@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Layer Seven Studio | Full Stack Web Development Agency",
   description: "Premium full-stack web development agency specializing in modern web applications, frontend, backend, CI/CD, and cloud infrastructure. Building exceptional digital experiences.",
   keywords: ["web development", "full stack", "frontend", "backend", "CI/CD", "software agency"],
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -25,9 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <CursorEffect />
         {children}

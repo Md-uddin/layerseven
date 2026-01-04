@@ -1,19 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Send, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
+
+const SUBMISSION_LIMIT = 3;
+const STORAGE_KEY = 'contact_form_submissions';
 
 export default function Contact() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   const [formState, setFormState] = useState<FormState>('idle');
+  const [submissionCount, setSubmissionCount] = useState(0);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -21,8 +23,21 @@ export default function Contact() {
     message: '',
   });
 
+  useEffect(() => {
+    // Check submission count from localStorage
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const count = stored ? parseInt(stored, 10) : 0;
+    setSubmissionCount(count);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if limit reached
+    if (submissionCount >= SUBMISSION_LIMIT) {
+      return;
+    }
+
     setFormState('submitting');
 
     try {
@@ -48,6 +63,11 @@ export default function Contact() {
 
       if (error) throw error;
 
+      // Increment submission count
+      const newCount = submissionCount + 1;
+      setSubmissionCount(newCount);
+      localStorage.setItem(STORAGE_KEY, newCount.toString());
+
       setFormState('success');
       setFormData({ name: '', email: '', company: '', message: '' });
 
@@ -70,7 +90,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative py-32 px-6 overflow-hidden" ref={ref}>
+    <section id="contact" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden" ref={ref}>
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-t from-muted/20 to-background" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl" />
@@ -80,12 +100,12 @@ export default function Contact() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16 px-2"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
             Let's Build <span className="text-accent">Together</span>
           </h2>
-          <p className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto">
             Have a project in mind? We'd love to hear about it. Send us a message and we'll get back to you within 24 hours.
           </p>
         </motion.div>
@@ -94,7 +114,7 @@ export default function Contact() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative p-8 md:p-12 rounded-2xl bg-muted/50 border border-border backdrop-blur-sm"
+          className="relative p-6 sm:p-8 md:p-12 rounded-2xl bg-muted/50 border border-border backdrop-blur-sm"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
@@ -167,7 +187,7 @@ export default function Contact() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={formState === 'submitting'}
+              disabled={formState === 'submitting' || submissionCount >= SUBMISSION_LIMIT}
               className="group w-full px-8 py-4 bg-accent hover:bg-accent-hover disabled:bg-accent/50 text-background font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-accent/20 hover:shadow-accent/40 disabled:cursor-not-allowed"
             >
               {formState === 'submitting' ? (
@@ -183,8 +203,23 @@ export default function Contact() {
               )}
             </button>
 
+            {/* Submission Limit Reached - Always Show */}
+            {submissionCount >= SUBMISSION_LIMIT && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-3 p-4 rounded-lg bg-accent/10 border border-accent/20 text-accent"
+              >
+                <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-medium">Your response has been recorded.</p>
+                  <p className="text-sm mt-1 text-accent/80">Our team will get back to you soon. Thank you for your interest!</p>
+                </div>
+              </motion.div>
+            )}
+
             {/* Success/Error Messages */}
-            {formState === 'success' && (
+            {formState === 'success' && submissionCount < SUBMISSION_LIMIT && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -209,10 +244,12 @@ export default function Contact() {
 
           {/* Contact Info */}
           <div className="mt-12 pt-8 border-t border-border">
-            <div className="flex items-center justify-center gap-2 text-foreground/70">
-              <Mail className="w-5 h-5 text-accent" />
-              <span>Or email us directly at </span>
-              <a href="mailto:hello@layersevenstudio.com" className="text-accent hover:underline">
+            <div className="flex flex-col items-center justify-center gap-3 text-center">
+              <div className="flex items-center gap-2 text-foreground/70">
+                <Mail className="w-5 h-5 text-accent" />
+                <span>Or email us directly at</span>
+              </div>
+              <a href="mailto:hello@layersevenstudio.com" className="text-accent hover:underline text-lg font-medium">
                 hello@layersevenstudio.com
               </a>
             </div>
