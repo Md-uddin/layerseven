@@ -58,18 +58,16 @@ export default function TechCarousel() {
   return (
     <div className="relative w-full overflow-hidden py-8">
       {/* Gradient overlays for fade effect */}
-      <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
       {/* Scrolling container */}
       <div className="tech-scroll-container">
         <div className="tech-scroll-content">
           {duplicatedTechs.map((tech, index) => (
-            <div
-              key={`${tech}-${index}`}
-              className="tech-badge group"
-            >
-              <span className="relative z-10">{tech}</span>
+            <div key={`${tech}-${index}`} className="tech-item group">
+              <span className="tech-text">{tech}</span>
+              <span className="tech-divider">•</span>
               {/* Glow effect on hover */}
               <div className="tech-glow" />
             </div>
@@ -85,7 +83,8 @@ export default function TechCarousel() {
 
         .tech-scroll-content {
           display: flex;
-          gap: 1rem;
+          align-items: center;
+          gap: 0;
           animation: scroll 60s linear infinite;
           will-change: transform;
         }
@@ -94,43 +93,55 @@ export default function TechCarousel() {
           animation-play-state: paused;
         }
 
-        .tech-badge {
+        .tech-item {
           position: relative;
           flex-shrink: 0;
-          padding: 0.5rem 1rem;
-          border-radius: 0.5rem;
-          background: rgba(39, 39, 42, 0.5);
-          border: 1px solid rgba(63, 63, 70, 0.5);
-          backdrop-filter: blur(8px);
-          font-size: 0.875rem;
-          color: rgba(245, 245, 245, 0.7);
-          white-space: nowrap;
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
           cursor: default;
-          transition: all 0.3s ease;
         }
 
-        .tech-badge:hover {
+        .tech-text {
+          position: relative;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: rgba(245, 245, 245, 0.5);
+          white-space: nowrap;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          letter-spacing: 0.02em;
+        }
+
+        .tech-item:hover .tech-text {
           color: #06b6d4;
-          border-color: rgba(6, 182, 212, 0.5);
-          transform: translateY(-2px);
+          letter-spacing: 0.05em;
+        }
+
+        .tech-divider {
+          font-size: 0.6rem;
+          color: rgba(245, 245, 245, 0.2);
+          user-select: none;
         }
 
         .tech-glow {
           position: absolute;
-          inset: -4px;
-          border-radius: 0.5rem;
+          left: -0.5rem;
+          right: -0.5rem;
+          top: 50%;
+          transform: translateY(-50%);
+          height: 2rem;
           background: radial-gradient(
-            circle at center,
-            rgba(6, 182, 212, 0.3) 0%,
-            transparent 70%
+            ellipse at center,
+            rgba(6, 182, 212, 0.2) 0%,
+            transparent 60%
           );
           opacity: 0;
-          transition: opacity 0.3s ease;
+          transition: opacity 0.4s ease;
           pointer-events: none;
-          filter: blur(8px);
+          filter: blur(12px);
         }
 
-        .tech-badge:hover .tech-glow {
+        .tech-item:hover .tech-glow {
           opacity: 1;
         }
 
