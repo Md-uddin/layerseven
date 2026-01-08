@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Send, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
+import { CONTACT_EMAIL_PRIMARY, CONTACT_EMAIL_SECONDARY } from '@/lib/constants';
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -244,14 +245,19 @@ export default function Contact() {
 
           {/* Contact Info */}
           <div className="mt-12 pt-8 border-t border-border">
-            <div className="flex flex-col items-center justify-center gap-3 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
               <div className="flex items-center gap-2 text-foreground/70">
                 <Mail className="w-5 h-5 text-accent" />
                 <span>Or email us directly at</span>
               </div>
-              <a href="mailto:hello@layersevenstudio.com" className="text-accent hover:underline text-lg font-medium">
-                hello@layersevenstudio.com
-              </a>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+                <a href={`mailto:${CONTACT_EMAIL_PRIMARY}`} className="text-accent hover:underline text-lg font-medium">
+                  {CONTACT_EMAIL_PRIMARY}
+                </a>
+                <a href={`mailto:${CONTACT_EMAIL_SECONDARY}`} className="text-accent hover:underline text-lg font-medium">
+                  {CONTACT_EMAIL_SECONDARY}
+                </a>
+              </div>
             </div>
           </div>
         </motion.div>
